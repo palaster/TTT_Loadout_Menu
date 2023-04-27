@@ -24,25 +24,28 @@ if SERVER then -- Our serverside stuff
 	hook.Add( "TTTBeginRound", "loadout_distribute", function()
 		for k, ply in pairs( player.GetAll() ) do 
 			-- Checks if the player has loadouts enabled
-			if ply:GetPData("TTTLoadoutOn", "false") == "true" then 
+			if ply:GetPData("TTTLoadoutOn", "false") == "true" and not ply:IsSpec() and ply:Alive() and ply:canUseLoadout() then 
 				-- Grab the loadouts from PData
 				local p = ply:GetPData("TTTPrimary", "")
 				local s = ply:GetPData("TTTSecondary", "")
 				local g = ply:GetPData("TTTGrenade", "")
 				
-				-- The 3 commandments of loadouts
-				if ply:IsSpec() or not ply:Alive() then return end -- Only give to the living
-				if not ply:canUseLoadout() then return end -- Only give to those worthy
-				if p == "" and s == "" and g == "" then return end -- Only give to those who want it
+				if p ~= "" or s ~= "" or g ~= "" then
+					print(ply:Nick().." has been given a loadout!")
 				
-				print(ply:Nick().." has been given a loadout!")
-				
-				ply:Give( p )
-				ply:Give( s )
-				ply:Give( g )
-				
-				net.Start("loadout_received")
-				net.Send(ply)
+					if p ~= "" then
+						ply:Give( p )
+					end
+					if s ~= "" then
+						ply:Give( s )
+					end
+					if g ~= "" then
+						ply:Give( g )
+					end
+					
+					net.Start("loadout_received")
+					net.Send(ply)
+				end
 			end
 		end
 	end)
